@@ -1,1 +1,10 @@
-{"lastCommitAt":null,"timezone":"America/Sao_Paulo","sessions":0,"tracks":{}}
+{
+  "lastCommitAt": "2026-10-24T03:31:13-03:00",
+  "timezone": "America/Sao_Paulo",
+  "sessions": 0,
+  "tracks": {
+    "english": {},
+    "japanese": {},
+    "coding": {}
+  }
+}
