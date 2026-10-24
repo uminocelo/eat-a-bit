@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# eat-a-bit: log study habits as git commits.
+#   eat-a-bit done   <habit> [minutes]   log a session (defaults to the habit's goal)
+#   eat-a-bit undo   <habit>             clear today's session
+#   eat-a-bit create <habit> [goal] [emoji] [color]
+#   eat-a-bit delete <habit>
+#   eat-a-bit list
+# Repo: $EAT_A_BIT_DIR (default ~/eat-a-bit). Set EAT_A_BIT_PUSH=0 to skip pushing.
+set -euo pipefail
+
+DIR="${EAT_A_BIT_DIR:-$HOME/eat-a-bit}"
+PUSH="${EAT_A_BIT_PUSH:-1}"
+cmd="${1:-help}"; habit="${2:-}"
+
+die() { echo "eat-a-bit: $*" >&2; exit 1; }
+usage() { sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; }
+need_habit() { [ -n "$habit" ] || die "missing <habit>. Try: eat-a-bit $cmd english"; }
+
+[ "$cmd" = help ] || [ "$cmd" = -h ] || [ "$cmd" = --help ] && { usage; exit 0; }
+command -v git >/dev/null || die "git not found"
+command -v node >/dev/null || die "node not found (needed to edit tracks.json)"
+[ -d "$DIR/.git" ] || die "no repo at $DIR (set EAT_A_BIT_DIR)"
+cd "$DIR"
+
+id="$(printf '%s' "$habit" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-*//;s/-*$//')"
+
+has_track() { node -e 'const t=require("./tracks.json");process.exit(t.some(x=>x.id===process.argv[1])?0:1)' "$1"; }
+
+sync() {
+  git pull --rebase --quiet 2>/dev/null || true
+  if [ "$PUSH" = 1 ]; then git push --quiet && echo "🚀 pushed"; fi
+}
+
+log_line() {
+  mkdir -p logs
+  echo "- $(date '+%Y-%m-%d %H:%M') $1" >> "logs/$(date +%Y-%m).md"
+  git add logs
+}
+
+case "$cmd" in
+  done)
+    need_habit; has_track "$id" || die "unknown habit '$id'. Create it: eat-a-bit create $id"
+    mins="${3:-}"
+    if [ -n "$mins" ]; then
+      [[ "$mins" =~ ^[0-9]+$ ]] || die "minutes must be a number"
+      msg="[$id] ${mins}min"
+    else
+      msg="[$id]"
+    fi
+    git pull --rebase --quiet 2>/dev/null || true
+    log_line "$msg"; git commit --quiet -m "$msg"
+    echo "🔥 $msg logged"; sync ;;
+  undo)
+    need_habit; has_track "$id" || die "unknown habit '$id'"
+    git pull --rebase --quiet 2>/dev/null || true
+    log_line "[$id] undo"; git commit --quiet -m "[$id] undo"
+    echo "↩️  today's $id cleared"; sync ;;
+  create)
+    need_habit; has_track "$id" && die "'$id' already exists"
+    goal="${3:-15}"; emoji="${4:-📚}"; color="${5:-#58cc02}"
+    [[ "$goal" =~ ^[0-9]+$ ]] || die "goal must be a number of minutes"
+    git pull --rebase --quiet 2>/dev/null || true
+    node -e '
+      const fs=require("fs"),[id,name,goal,emoji,color]=process.argv.slice(1);
+      const t=JSON.parse(fs.readFileSync("tracks.json","utf8"));
+      t.push({id,name,emoji,goal:Number(goal),color});
+      fs.writeFileSync("tracks.json","[\n"+t.map(x=>"  "+JSON.stringify(x)).join(",\n")+"\n]\n");
+    ' "$id" "$habit" "$goal" "$emoji" "$color"
+    git add tracks.json; git commit --quiet -m "Add track: $id"
+    echo "✨ created $emoji $habit ($goal min/day)"; sync ;;
+  delete)
+    need_habit; has_track "$id" || die "unknown habit '$id'"
+    read -r -p "Delete '$id'? Its history stays in git but stops showing. [y/N] " ok
+    [[ "$ok" =~ ^[yY]$ ]] || { echo "cancelled"; exit 0; }
+    git pull --rebase --quiet 2>/dev/null || true
+    node -e '
+      const fs=require("fs"),id=process.argv[1];
+      const t=JSON.parse(fs.readFileSync("tracks.json","utf8")).filter(x=>x.id!==id);
+      fs.writeFileSync("tracks.json","[\n"+t.map(x=>"  "+JSON.stringify(x)).join(",\n")+"\n]\n");
+    ' "$id"
+    git add tracks.json; git commit --quiet -m "Delete track: $id"
+    echo "🗑️  deleted $id"; sync ;;
+  list)
+    node -e 'for(const x of require("./tracks.json"))console.log(`${x.emoji}  ${x.id.padEnd(12)} ${x.goal} min/day`)' ;;
+  *) usage; exit 1 ;;
+esac

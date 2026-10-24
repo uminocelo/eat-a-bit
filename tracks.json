@@ -1,0 +1,5 @@
+[
+  { "id": "english", "name": "English", "emoji": "🇬🇧", "goal": 15, "color": "#1cb0f6" },
+  { "id": "japanese", "name": "Japanese", "emoji": "🇯🇵", "goal": 15, "color": "#ff4b4b" },
+  { "id": "coding", "name": "Coding", "emoji": "💻", "goal": 15, "color": "#58cc02" }
+]

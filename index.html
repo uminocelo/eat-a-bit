@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#58cc02">
+<title>Eat a Bit</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>🔥 Eat a Bit</h1>
+  <p id="today" class="muted"></p>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+</header>
+<main>
+  <section id="summary" class="summary" aria-label="Summary"></section>
+  <section id="tracks" aria-label="Tracks"></section>
+  <div class="row center">
+    <button id="export" class="btn ghost" type="button">Export JSON</button>
+  </div>
+</main>
+<footer class="foot">Log from your terminal: <code>eat-a-bit done &lt;habit&gt;</code></footer>
+<script src="app.js"></script>
+</body>
+</html>
