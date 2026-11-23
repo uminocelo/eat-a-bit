@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{--bg:#f7f7f7;--card:#fff;--fg:#222;--muted:#777;--line:#e5e5e5;--empty:#ebedf0;--green:#58cc02}
+*{box-sizing:border-box}html,body{margin:0;width:1200px;height:630px}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);display:flex;align-items:center;justify-content:center}
+.card{width:1080px;height:510px;background:var(--card);border:2px solid var(--line);border-top:16px solid var(--green);border-radius:32px;padding:52px 64px;display:flex;gap:56px;align-items:center}
+.left{flex:1}
+h1{margin:0;font-size:92px;line-height:1;letter-spacing:-2px;display:flex;align-items:center;gap:22px}
+h1 .e{font-family:"Noto Color Emoji";font-size:96px}
+p{margin:22px 0 0;font-size:32px;line-height:1.3;color:var(--muted)}
+code{display:inline-block;white-space:nowrap;margin-top:34px;font-family:ui-monospace,Menlo,"DejaVu Sans Mono",monospace;font-size:22px;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 16px;color:var(--fg)}
+.heat{display:grid;grid-template-columns:repeat(7,40px);gap:8px}
+.heat i{width:40px;height:40px;border-radius:9px;background:var(--empty)}
+.flame{margin-top:18px;text-align:center;font-size:34px;font-weight:800;color:#ff9600}
+.flame span{font-family:"Noto Color Emoji"}
+</style></head><body><div class="card">
+<div class="left">
+<h1><span class="e">🍰</span>Eat a Bit</h1>
+<p>Track habits with empty commits.<br>No database, just your git log.</p>
+<code>eat-a-bit done japanese</code>
+</div>
+<div><div class="heat" id="h"></div><div class="flame"><span>🔥</span> keep the streak</div></div>
+</div>
+<script>
+const c=['#1cb0f6','#ff4b4b','#58cc02'];const h=document.getElementById('h');
+const pat="0120201 1201120 2012012 1202101 0211202 2101210 1210212";let k=0;
+for(const ch of pat.replace(/ /g,'')){const i=document.createElement('i');const n=(k*7+3)%10;
+if(n<7){i.style.background=c[(+ch)];if(n>4)i.style.opacity=.5}h.appendChild(i);k++}
+</script></body></html>
